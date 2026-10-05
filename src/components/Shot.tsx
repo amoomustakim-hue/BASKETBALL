@@ -67,8 +67,13 @@ export function Shot() {
         gsap.fromTo(net, { scaleY: 1, skewX: 0 }, { scaleY: 1.18, skewX: 6, duration: 0.12, yoyo: true, repeat: 3, ease: 'sine.inOut', transformOrigin: '50% 0%' })
         gsap.fromTo(root.current, { x: -4 }, { x: 0, duration: 0.4, ease: 'elastic.out(1, 0.3)' })
         gsap.fromTo('.sh-spark', { scale: 0, opacity: 1 }, { scale: 1, opacity: 0, duration: 0.6, stagger: 0.02, ease: 'power2.out' })
+        gsap.fromTo('.sh-swish', { scale: 3, opacity: 0, rotate: -20 }, { scale: 1, opacity: 1, rotate: -8, duration: 0.35, ease: 'back.out(2.2)' })
+        gsap.fromTo('.sh-flash', { opacity: 0.8 }, { opacity: 0, duration: 0.25 })
       }
-      if (p < 0.7) scored = false
+      if (p < 0.7) {
+        scored = false
+        gsap.set('.sh-swish', { opacity: 0 })
+      }
     }
 
     layout()
@@ -122,24 +127,44 @@ export function Shot() {
           </g>
           <ellipse cx="100" cy="104" rx="42" ry="7" fill="none" stroke="#ff6a1a" strokeWidth="5" />
           {[...Array(10)].map((_, i) => (
-            <circle key={i} className="sh-spark" cx={100 + Math.cos(i * 0.63) * 70} cy={110 + Math.sin(i * 0.63) * 40} r="3" fill="#d4ff3a" opacity="0" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} />
+            <circle key={i} className="sh-spark" cx={100 + Math.cos(i * 0.63) * 70} cy={110 + Math.sin(i * 0.63) * 40} r="3" fill="#ffc20e" opacity="0" style={{ transformBox: 'fill-box', transformOrigin: 'center' }} />
           ))}
         </svg>
       </div>
 
       {/* Arc trail + ball */}
       <svg className="sh-svg pointer-events-none absolute inset-0 h-full w-full" aria-hidden="true">
-        <polyline className="sh-trail" fill="none" stroke="#d4ff3a" strokeWidth="2.5" strokeDasharray="2 10" strokeLinecap="round" />
+        <polyline className="sh-trail" fill="none" stroke="#ffc20e" strokeWidth="2.5" strokeDasharray="2 10" strokeLinecap="round" />
       </svg>
       <div className="sh-ball absolute top-0 left-0 size-[13vw] max-h-[92px] max-w-[92px] min-h-[54px] min-w-[54px] will-change-transform">
         <div className="absolute inset-[-40%] rounded-full bg-[radial-gradient(circle,rgba(255,106,26,0.45),transparent_65%)]" />
         <Ball />
       </div>
 
+      {/* SWISH! */}
+      <div className="sh-swish pointer-events-none absolute top-[8%] right-[30%] z-10 opacity-0 sm:right-[34%]" aria-hidden="true">
+        <svg viewBox="0 0 300 200" className="w-[46vw] max-w-[380px] drop-shadow-[8px_8px_0_#0b0b0b]">
+          <path
+            d={Array.from({ length: 28 }, (_, i) => {
+              const a = (i / 28) * Math.PI * 2
+              const r = i % 2 ? 62 : 98
+              return `${i ? 'L' : 'M'}${150 + Math.cos(a) * r * 1.45} ${100 + Math.sin(a) * r * 0.95}`
+            }).join(' ') + 'Z'}
+            fill="#ffc20e"
+            stroke="#0b0b0b"
+            strokeWidth="6"
+          />
+          <text x="150" y="122" textAnchor="middle" fontFamily="Anton, Impact, sans-serif" fontSize="74" fill="#0b0b0b">
+            SWISH!
+          </text>
+        </svg>
+      </div>
+      <div className="sh-flash pointer-events-none absolute inset-0 z-20 bg-volt opacity-0" aria-hidden="true" />
+
       {/* Headline falls out of the net */}
       <h2 className="absolute right-[6%] bottom-[10%] left-[6%] text-right sm:right-[10%]">
-        <span className="sh-line display block text-[clamp(52px,10vw,170px)] text-chalk">Lagos builds them.</span>
-        <span className="sh-line display block text-[clamp(52px,10vw,170px)] text-volt">The world plays them.</span>
+        <span className="sh-line display block text-[clamp(52px,10vw,170px)] text-chalk [text-shadow:8px_8px_0_#ff4d00]">Lagos builds them.</span>
+        <span className="sh-line display block text-[clamp(52px,10vw,170px)] text-volt [text-shadow:8px_8px_0_#ff4d00]">The world plays them.</span>
       </h2>
     </section>
   )

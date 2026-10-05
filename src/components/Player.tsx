@@ -80,13 +80,15 @@ export function PlayerView({ slug }: { slug: string }) {
   return (
     <div ref={root} className="bg-ink">
       {/* 1. Entry */}
-      <section className="pl-entry relative h-svh min-h-[620px] overflow-hidden">
+      <section className={`pl-entry relative h-svh min-h-[620px] overflow-hidden ${photo ? "" : "bg-volt text-tar"}`}>
+        {!photo && <div className="halftone opacity-40" aria-hidden="true" />}
+        {!photo && <div aria-hidden="true" className="hazard absolute -top-6 -right-24 h-14 w-[60vw] rotate-6 shadow-[0_8px_0_#0b0b0b]" />}
         {photo && (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={(p.image as { src: string }).src} alt="" className="pl-hero absolute inset-0 h-full w-full object-cover [filter:grayscale(1)_contrast(1.15)_brightness(.6)]" />
         )}
-        <div aria-hidden="true" className="absolute inset-0 bg-[radial-gradient(55%_60%_at_50%_45%,rgba(212,255,58,0.16),transparent_70%)]" />
-        <h1 className="pl-name display pointer-events-none absolute inset-x-0 top-[18svh] overflow-hidden text-center text-[clamp(64px,19vw,300px)] leading-[0.85] text-chalk/90" aria-label={p.name}>
+        <div aria-hidden="true" className="absolute inset-0 bg-[radial-gradient(55%_60%_at_50%_45%,rgba(255,194,14,0.16),transparent_70%)]" />
+        <h1 className={`pl-name display pointer-events-none absolute inset-x-0 top-[18svh] overflow-hidden text-center text-[clamp(64px,19vw,300px)] leading-[0.85] ${photo ? "text-chalk/90" : "text-tar"}`} aria-label={p.name}>
           {p.name.split(' ').map((w, wi) => (
             <span key={wi} className="block whitespace-nowrap">
               {w.split('').map((c, i) => (
@@ -97,7 +99,7 @@ export function PlayerView({ slug }: { slug: string }) {
             </span>
           ))}
         </h1>
-        <span aria-hidden="true" className="display absolute right-[4%] bottom-[6%] text-[clamp(120px,24vw,360px)] text-transparent [-webkit-text-stroke:2px_rgba(212,255,58,.5)]">
+        <span aria-hidden="true" className="display absolute right-[4%] bottom-[6%] text-[clamp(120px,24vw,360px)] text-transparent [-webkit-text-stroke:3px_#ff4d00]">
           {p.number}
         </span>
         {!photo && (
@@ -105,7 +107,7 @@ export function PlayerView({ slug }: { slug: string }) {
           <img
             src={cardImage(p)}
             alt={p.name}
-            className="pl-hero absolute bottom-0 left-1/2 h-[84svh] w-auto max-w-none -translate-x-1/2 [filter:drop-shadow(0_0_2px_#d4ff3a)_drop-shadow(0_30px_60px_rgba(0,0,0,.8))]"
+            className="pl-hero absolute bottom-0 left-1/2 h-[84svh] w-auto max-w-none -translate-x-1/2 [filter:saturate(1.3)_drop-shadow(3px_0_0_#fff)_drop-shadow(-3px_0_0_#fff)_drop-shadow(0_-3px_0_#fff)_drop-shadow(16px_16px_0_#0b0b0b)]"
             style={{ transform: 'translateX(-50%)' }}
           />
         )}
@@ -124,7 +126,7 @@ export function PlayerView({ slug }: { slug: string }) {
       <section className="relative px-5 py-24 sm:px-10">
         <div className="mx-auto grid max-w-[1200px] items-center gap-10 lg:grid-cols-[1.6fr_1fr]">
           <div className="[perspective:1200px]">
-            <div className="pl-screen relative rounded-[14px] p-[3px]" style={{ background: 'linear-gradient(90deg,#d4ff3a,#ff6a1a,#d4ff3a,#f2f1ec,#d4ff3a)', backgroundSize: '300% 100%', animation: 'led 3s linear infinite' }}>
+            <div className="pl-screen relative rounded-[14px] p-[3px]" style={{ background: 'linear-gradient(90deg,#ffc20e,#ff6a1a,#ffc20e,#f2f1ec,#ffc20e)', backgroundSize: '300% 100%', animation: 'led 3s linear infinite' }}>
               <div className="overflow-hidden rounded-[12px] bg-ink">
                 <div className="flex items-center justify-between border-b border-chalk/10 px-4 py-2 font-mono text-[10px] tracking-widest text-ash uppercase">
                   <span>
@@ -175,7 +177,7 @@ export function PlayerView({ slug }: { slug: string }) {
                     </span>
                   </span>
                   <span className="relative block h-3 overflow-hidden rounded-[2px] bg-steel">
-                    <span className="pl-bar absolute inset-y-0 left-0 origin-left bg-[linear-gradient(90deg,#9fbf20,#d4ff3a)] shadow-[0_0_18px_rgba(212,255,58,.6)]" style={{ width: `${v}%` }} />
+                    <span className="pl-bar absolute inset-y-0 left-0 origin-left bg-[linear-gradient(90deg,#ff8a00,#ffc20e)] shadow-[0_0_18px_rgba(255,194,14,.6)]" style={{ width: `${v}%` }} />
                   </span>
                 </li>
               ))}
@@ -190,7 +192,7 @@ export function PlayerView({ slug }: { slug: string }) {
                 </span>
               ))}
               <span className="pl-mark absolute left-[-2px] flex items-center gap-2" style={{ bottom: 0 }}>
-                <span className="h-[3px] w-16 bg-volt shadow-[0_0_14px_#d4ff3a]" />
+                <span className="h-[3px] w-16 bg-volt shadow-[0_0_14px_#ffc20e]" />
                 <span className="display text-[34px] whitespace-nowrap text-volt">{p.height}</span>
               </span>
             </div>
@@ -237,7 +239,7 @@ export function PlayerView({ slug }: { slug: string }) {
               <circle cx="250" cy="44" r="9" stroke="#ff6a1a" strokeOpacity="1" />
             </g>
             {makes.map((s, i) => (
-              <circle key={i} className="pl-shot" cx={s.x} cy={s.y} r="6" fill={s.made ? '#d4ff3a' : 'none'} stroke={s.made ? 'none' : '#8a8a90'} strokeWidth="2" style={{ transformBox: 'fill-box' }} />
+              <circle key={i} className="pl-shot" cx={s.x} cy={s.y} r="6" fill={s.made ? '#ffc20e' : 'none'} stroke={s.made ? 'none' : '#8a8a90'} strokeWidth="2" style={{ transformBox: 'fill-box' }} />
             ))}
           </svg>
         </div>
@@ -271,8 +273,8 @@ export function PlayerView({ slug }: { slug: string }) {
 
 function RatingCard({ p }: { p: Player }) {
   return (
-    <div className="pl-card relative mx-auto aspect-[5/7] w-full max-w-[340px] overflow-hidden rounded-[16px] border border-chalk/20 bg-[linear-gradient(160deg,#26262b,#0d0d0f)] shadow-[0_40px_80px_-30px_rgba(212,255,58,.3)]">
-      <span className="absolute inset-0 bg-[radial-gradient(70%_50%_at_50%_30%,rgba(212,255,58,.2),transparent)]" />
+    <div className="pl-card relative mx-auto aspect-[5/7] w-full max-w-[340px] overflow-hidden rounded-[16px] border border-chalk/20 bg-[linear-gradient(160deg,#26262b,#0d0d0f)] shadow-[0_40px_80px_-30px_rgba(255,194,14,.3)]">
+      <span className="absolute inset-0 bg-[radial-gradient(70%_50%_at_50%_30%,rgba(255,194,14,.2),transparent)]" />
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={cardImage(p)} alt="" className={`absolute ${p.image.kind === 'photo' ? 'inset-0 h-full w-full object-cover opacity-70' : 'bottom-[20%] left-1/2 h-[72%] w-auto max-w-none -translate-x-1/2'}`} />
       <span className="absolute top-4 left-4 flex flex-col items-center leading-none">

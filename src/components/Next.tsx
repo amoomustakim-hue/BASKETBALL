@@ -159,8 +159,9 @@ export function YoureNext() {
           </div>
 
           {/* Live card */}
-          <div className="relative mx-auto aspect-[5/7] w-full max-w-[380px] overflow-hidden rounded-[18px] border border-chalk/20 bg-[linear-gradient(160deg,#26262b,#0d0d0f)] shadow-[0_40px_80px_-30px_rgba(212,255,58,.25)]">
-            <span className="absolute inset-0 bg-[radial-gradient(70%_50%_at_50%_30%,rgba(212,255,58,.22),transparent)]" />
+          <div className="relative mx-auto aspect-[5/7] w-full max-w-[380px] -rotate-2 overflow-hidden border-[6px] border-tar bg-[radial-gradient(80%_70%_at_50%_35%,#ff8a00,#ff4d00_55%,#b32400)] shadow-[0_0_0_8px_#ffc20e,16px_18px_0_8px_#0b0b0b]">
+            <span className="halftone opacity-60" aria-hidden="true" />
+            <span className="absolute inset-0 bg-[radial-gradient(70%_50%_at_50%_30%,rgba(255,194,14,.22),transparent)]" />
             {photo ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={photo} alt="" className="absolute inset-x-0 top-[12%] mx-auto h-[62%] w-[78%] rounded-[12px] object-cover" />
@@ -209,8 +210,8 @@ async function downloadStory({ name, pos, height, ovr, photo }: { name: string; 
   g.fillStyle = '#0a0a0b'
   g.fillRect(0, 0, 1080, 1920)
   const glow = g.createRadialGradient(540, 700, 50, 540, 700, 760)
-  glow.addColorStop(0, 'rgba(212,255,58,0.35)')
-  glow.addColorStop(1, 'rgba(212,255,58,0)')
+  glow.addColorStop(0, 'rgba(255,194,14,0.35)')
+  glow.addColorStop(1, 'rgba(255,194,14,0)')
   g.fillStyle = glow
   g.fillRect(0, 0, 1080, 1920)
   g.fillStyle = '#f2f1ec'
@@ -268,7 +269,7 @@ async function downloadStory({ name, pos, height, ovr, photo }: { name: string; 
   g.roundRect(x, y, w, h, 36)
   g.stroke()
   g.textAlign = 'left'
-  g.fillStyle = '#d4ff3a'
+  g.fillStyle = '#ffc20e'
   g.font = '140px Anton'
   g.fillText(String(ovr), x + 46, y + 170)
   g.font = '28px monospace'
@@ -281,10 +282,10 @@ async function downloadStory({ name, pos, height, ovr, photo }: { name: string; 
   g.fillStyle = 'rgba(242,241,236,0.75)'
   g.fillText(`${pos.toUpperCase()}   ${height}`, x + 50, y + h - 50)
   g.textAlign = 'right'
-  g.fillStyle = '#d4ff3a'
+  g.fillStyle = '#ffc20e'
   g.fillText('ELITE 50 HOPEFUL', x + w - 50, y + h - 50)
   g.textAlign = 'center'
-  g.fillStyle = '#d4ff3a'
+  g.fillStyle = '#ffc20e'
   g.font = '120px Anton'
   g.fillText('YOU’RE NEXT.', 540, 1560)
   g.font = '34px monospace'
@@ -371,7 +372,7 @@ function FlickShot({ onScore, onSkip }: { onScore: () => void; onSkip: () => voi
       if (drag && drag.length > 1) {
         const a = drag[0], b = drag[drag.length - 1]
         g.setLineDash([3, 8])
-        g.strokeStyle = 'rgba(212,255,58,0.8)'
+        g.strokeStyle = 'rgba(255,194,14,0.8)'
         g.lineWidth = 2.5
         g.beginPath()
         g.moveTo(ball.x, ball.y)
@@ -527,7 +528,7 @@ function confetti(anchor: HTMLElement) {
   const host = anchor.parentElement!
   for (let i = 0; i < 46; i++) {
     const s = document.createElement('span')
-    s.style.cssText = `position:absolute;left:50%;top:30%;width:8px;height:14px;border-radius:2px;background:${i % 3 ? '#d4ff3a' : '#f2f1ec'};pointer-events:none;z-index:5`
+    s.style.cssText = `position:absolute;left:50%;top:30%;width:8px;height:14px;border-radius:2px;background:${i % 3 ? '#ffc20e' : '#f2f1ec'};pointer-events:none;z-index:5`
     host.appendChild(s)
     gsap.to(s, {
       x: gsap.utils.random(-260, 260),

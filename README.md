@@ -19,10 +19,12 @@ Deploy: import the repo in Vercel. No environment variables.
 | Section | What happens |
 | --- | --- |
 | Tip-off | A 24-second shot clock counts down, the buzzer flashes, the arena lights slam on. Enter with sound or quietly. |
-| Q1 · The Lineup | The team on a Lagos road in black and white, BANIRE behind them. Hover a player: he lights up in colour with a volt rim and his highlight plays inside his silhouette. Click: the camera dives into him. Scroll: the starting lineup is announced one by one, then lights out except the ball. |
+| Look | "Street heat": danfo yellow, tar black, fire orange; hazard stripes, halftone, tape and marker scribbles. |
+| Q1 · The Lineup | A street poster: the team as a black-and-white sticker on danfo yellow, a giant BANIRE behind them. Each name slams in with a flash and a camera shake. Hover a player: he lights up in colour with a volt rim and his highlight plays inside his silhouette. Click: the camera dives into him. Scroll: the starting lineup is announced one by one, then lights out except the ball. |
 | Q1 · The Shot | Your scroll is the jump shot. Swish, the net ripples, the headline falls out of the hoop. |
-| Q2 · Elite 50 | A counter runs to 50; camp photos slide past in black and white; a volt spotlight follows the cursor. |
-| Q2 · Draft Board | Holographic trading cards that tilt, shine and play highlights. Filters shuffle the deck. |
+| Caution tape | Two giant tapes cross the screen; they speed up and lean with your scroll speed. |
+| Q2 · Elite 50 | The camp footage plays through the letters ELITE 50; scroll flies you through into the footage. Then a counter to 50 and taped prints. |
+| Q2 · The Pile | Trading cards thrown onto the hardwood: grab and fling them, hover to lift, click to scout. Phones get a fanned hand. |
 | Q3 · The Pathway | Split-flap departures board and routes drawing out of Lagos. |
 | Q4 · You're next | Build your own prospect card and download it as an Instagram Story, then make a flick shot to unlock the Elite 50 application. |
 | Player pages | `/players/[slug]`: name builds behind him, arena-screen film with chapters, attribute bars, height ruler, shot chart, next player. |

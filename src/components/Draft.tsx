@@ -1,10 +1,10 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useChrome } from './Chrome'
 import { PLAYERS, type Player, type Position } from '@/lib/players'
-import { gsap, isTouch, useScene } from '@/lib/motion'
-import { flick, squeak } from '@/lib/sound'
+import { gsap, useScene } from '@/lib/motion'
+import { dribble, flick, squeak } from '@/lib/sound'
 
 const FILTERS: ('All' | Position)[] = ['All', 'Guard', 'Wing', 'Big', 'Coach']
 
@@ -13,60 +13,95 @@ export function cardImage(p: Player) {
   return p.image.src
 }
 
+/** Where each card lands in the pile (percent of the floor), and its tilt. */
+function scatter(i: number, n: number) {
+  const cols = Math.ceil(Math.sqrt(n * 1.8))
+  const r = (k: number) => {
+    const x = Math.sin(i * 12.9898 + k * 78.233) * 43758.5453
+    return x - Math.floor(x)
+  }
+  const col = i % cols
+  const row = Math.floor(i / cols)
+  const rows = Math.ceil(n / cols)
+  return {
+    x: ((col + 0.5) / cols) * 100 + (r(1) - 0.5) * 9,
+    y: ((row + 0.5) / rows) * 100 + (r(2) - 0.5) * 14,
+    rot: (r(3) - 0.5) * 34,
+  }
+}
+
 /**
- * The Draft Board. Every player is a holographic trading card: it tilts to
- * the pointer, a rainbow sheen slides across, and his highlight plays behind
- * him. Filters shuffle the deck. Click a card to open his scouting report.
+ * The Pile. The roster is thrown onto the hardwood as trading cards. Grab
+ * one and fling it, hover to lift it off the pile, click to open the
+ * scouting report. Phones get a fanned hand you swipe through.
  */
 export function Draft() {
   const root = useRef<HTMLElement>(null)
-  const grid = useRef<HTMLDivElement>(null)
+  const floor = useRef<HTMLDivElement>(null)
   const [filter, setFilter] = useState<(typeof FILTERS)[number]>('All')
+  const [mobile, setMobile] = useState(false)
   const { quarter } = useChrome()
   const shown = PLAYERS.filter((p) => filter === 'All' || p.position === filter)
 
-  useScene(root, () => {
+  useEffect(() => setMobile(window.innerWidth < 768), [])
+
+  // The throw: cards fly in from below the floor, spinning, and slap down.
+  const deal = () => {
+    const cards = gsap.utils.toArray<HTMLElement>('.pile-card', root.current)
     gsap.fromTo(
-      '.dr-card',
-      { y: 120, rotate: () => gsap.utils.random(-14, 14), opacity: 0 },
+      cards,
+      { y: () => innerHeight * 0.9, x: () => gsap.utils.random(-300, 300), rotate: () => gsap.utils.random(-260, 260), scale: 1.25, opacity: 0 },
       {
         y: 0,
-        rotate: 0,
+        x: 0,
+        rotate: (i) => (mobile ? 0 : scatter(i, cards.length).rot),
+        scale: 1,
         opacity: 1,
-        duration: 0.7,
-        stagger: 0.05,
-        ease: 'back.out(1.3)',
-        scrollTrigger: { trigger: grid.current, start: 'top 80%', onEnter: () => flick(), onToggle: (s) => s.isActive && quarter('Q2 · Draft Board') },
+        duration: 0.55,
+        stagger: 0.07,
+        ease: 'back.out(1.1)',
+        onStart: () => flick(),
       },
     )
-  })
+  }
+
+  useScene(
+    root,
+    () => {
+      gsap.set('.pile-card', { opacity: 0 })
+      gsap.fromTo('.pile-title > span', { yPercent: 120, skewY: 12 }, { yPercent: 0, skewY: 0, stagger: 0.08, duration: 0.5, ease: 'back.out(1.6)', scrollTrigger: { trigger: root.current, start: 'top 70%' } })
+      gsap.timeline({ scrollTrigger: { trigger: floor.current, start: 'top 75%', once: true, onEnter: deal, onToggle: (s) => s.isActive && quarter('Q2 · The pile') } })
+    },
+    [mobile],
+  )
 
   const shuffle = (f: (typeof FILTERS)[number]) => {
     if (f === filter) return
     flick()
-    gsap.to('.dr-card', {
-      y: 30,
+    // Sweep the table, then throw the new hand.
+    gsap.to('.pile-card', {
+      x: () => gsap.utils.random(-1, 1) * innerWidth,
+      y: () => gsap.utils.random(-200, 200),
+      rotate: () => gsap.utils.random(-400, 400),
       opacity: 0,
-      rotate: () => gsap.utils.random(-8, 8),
-      duration: 0.16,
-      stagger: 0.015,
+      duration: 0.3,
+      stagger: 0.012,
+      ease: 'power2.in',
       onComplete: () => {
         setFilter(f)
-        requestAnimationFrame(() => gsap.fromTo('.dr-card', { y: -30, opacity: 0 }, { y: 0, opacity: 1, rotate: 0, duration: 0.35, stagger: 0.03, ease: 'back.out(1.6)' }))
+        requestAnimationFrame(() => requestAnimationFrame(deal))
       },
     })
   }
 
   return (
-    <section id="draft" ref={root} className="relative bg-court py-24 sm:py-32" aria-label="Draft board">
-      <div className="mx-auto max-w-[1400px] px-5 sm:px-10">
-        <div className="flex flex-wrap items-end justify-between gap-6">
-          <div>
-            <p className="font-mono text-[11px] tracking-[0.35em] text-ash uppercase">The roster</p>
-            <h2 className="display mt-2 text-[clamp(64px,12vw,180px)]">
-              Draft <span className="text-volt">board</span>
-            </h2>
-          </div>
+    <section id="draft" ref={root} className="relative overflow-hidden bg-tar pt-24 pb-16 sm:pt-32" aria-label="The roster">
+      <div className="relative z-10 mx-auto flex max-w-[1400px] flex-wrap items-end justify-between gap-6 px-5 sm:px-10">
+        <h2 className="pile-title display overflow-hidden text-[clamp(70px,13vw,200px)] leading-[0.82]">
+          <span className="inline-block">The</span> <span className="inline-block text-volt">pile</span>
+        </h2>
+        <div className="flex max-w-full flex-col items-start gap-3 sm:items-end">
+          <p className="marker -rotate-2 text-[22px] text-volt">{mobile ? 'swipe the hand, tap a card' : 'grab one. fling it. click to scout.'}</p>
           <div className="flex flex-wrap gap-2" role="tablist" aria-label="Filter by position">
             {FILTERS.map((f) => (
               <button
@@ -75,7 +110,7 @@ export function Draft() {
                 role="tab"
                 aria-selected={f === filter}
                 onClick={() => shuffle(f)}
-                className={`h-10 rounded-full px-4 font-mono text-[11px] tracking-widest uppercase transition-colors ${f === filter ? 'bg-volt text-ink' : 'border border-chalk/20 text-chalk/80 hover:border-chalk/60'}`}
+                className={`display h-11 border-2 border-volt px-4 text-[20px] transition-[transform,background-color,color] active:scale-95 ${f === filter ? 'bg-volt text-tar' : 'text-volt hover:-translate-y-0.5'}`}
                 data-cursor="DEAL"
               >
                 {f === 'All' ? 'All' : f === 'Coach' ? 'Staff' : `${f}s`}
@@ -83,51 +118,186 @@ export function Draft() {
             ))}
           </div>
         </div>
-        <div ref={grid} className="mt-12 grid grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
-          {shown.map((p) => (
-            <Card key={p.slug} p={p} />
+      </div>
+
+      {mobile ? (
+        <div ref={floor} className="relative mt-10 flex snap-x snap-mandatory gap-[-20px] overflow-x-auto px-[12vw] pt-6 pb-12 [scrollbar-width:none]">
+          {shown.map((p, i) => (
+            <div key={p.slug} className="pile-card w-[68vw] shrink-0 snap-center first:ml-0 [&:not(:first-child)]:-ml-[10vw]" style={{ zIndex: i, transform: `rotate(${i % 2 ? 4 : -4}deg)` }}>
+              <Card p={p} />
+            </div>
           ))}
         </div>
-        <p className="mt-8 font-mono text-[11px] text-ash">Names, numbers and stats are placeholders until the academy confirms them.</p>
-      </div>
+      ) : (
+        <Floor floorRef={floor} players={shown} />
+      )}
+      <p className="relative z-10 px-5 font-mono text-[11px] text-ash sm:px-10">Names, numbers and stats are placeholders until the academy confirms them.</p>
     </section>
   )
 }
 
-export function Card({ p, big = false }: { p: Player; big?: boolean }) {
+/** Desktop: the hardwood, with draggable, flingable cards. */
+function Floor({ floorRef, players }: { floorRef: React.RefObject<HTMLDivElement | null>; players: Player[] }) {
+  const top = useRef(100)
+
+  useEffect(() => {
+    const el = floorRef.current
+    if (!el) return
+    const cards = Array.from(el.querySelectorAll<HTMLElement>('.pile-drag'))
+    const cleanups = cards.map((c) => {
+      let sx = 0, sy = 0, ox = 0, oy = 0, vx = 0, vy = 0, lx = 0, ly = 0, lt = 0, moved = 0
+      let raf = 0
+      const pos = { x: 0, y: 0 }
+      const set = () => gsap.set(c, { x: pos.x, y: pos.y })
+      const down = (e: PointerEvent) => {
+        cancelAnimationFrame(raf)
+        c.setPointerCapture(e.pointerId)
+        sx = e.clientX
+        sy = e.clientY
+        ox = pos.x
+        oy = pos.y
+        lx = e.clientX
+        ly = e.clientY
+        lt = performance.now()
+        moved = 0
+        c.style.zIndex = String(++top.current)
+        gsap.to(c, { scale: 1.08, duration: 0.15 })
+        dribble(0.4)
+      }
+      const move = (e: PointerEvent) => {
+        if (!c.hasPointerCapture(e.pointerId)) return
+        pos.x = ox + e.clientX - sx
+        pos.y = oy + e.clientY - sy
+        moved = Math.max(moved, Math.hypot(e.clientX - sx, e.clientY - sy))
+        const t = performance.now()
+        const dt = Math.max(1, t - lt)
+        vx = ((e.clientX - lx) / dt) * 16
+        vy = ((e.clientY - ly) / dt) * 16
+        lx = e.clientX
+        ly = e.clientY
+        lt = t
+        set()
+      }
+      const up = (e: PointerEvent) => {
+        if (!c.hasPointerCapture(e.pointerId)) return
+        c.releasePointerCapture(e.pointerId)
+        gsap.to(c, { scale: 1, duration: 0.2 })
+        if (moved < 6) {
+          // A tap, not a throw: open his page.
+          c.dataset.click = '1'
+          c.querySelector<HTMLButtonElement>('button')?.click()
+          return
+        }
+        c.dataset.click = '0'
+        flick()
+        // Slide across the floor and slow down.
+        const spin = Number(c.dataset.rot || 0)
+        const glide = () => {
+          vx *= 0.92
+          vy *= 0.92
+          pos.x += vx
+          pos.y += vy
+          set()
+          gsap.set(c.firstElementChild, { rotate: spin + pos.x * 0.04 })
+          if (Math.hypot(vx, vy) > 0.4) raf = requestAnimationFrame(glide)
+        }
+        glide()
+      }
+      c.addEventListener('pointerdown', down)
+      c.addEventListener('pointermove', move)
+      c.addEventListener('pointerup', up)
+      return () => {
+        cancelAnimationFrame(raf)
+        c.removeEventListener('pointerdown', down)
+        c.removeEventListener('pointermove', move)
+        c.removeEventListener('pointerup', up)
+      }
+    })
+    return () => cleanups.forEach((f) => f())
+  }, [floorRef, players])
+
+  return (
+    <div
+      ref={floorRef}
+      className="relative mx-auto mt-6 h-[min(118vh,1100px)] max-w-[1500px]"
+      style={{
+        background:
+          'radial-gradient(60% 55% at 50% 45%, rgba(255,194,14,.12), transparent 70%), repeating-linear-gradient(90deg, #6b3f1d 0 78px, #74451f 78px 80px, #5e3718 80px 158px, #6f421e 158px 160px), linear-gradient(#5a3416, #2a170a)',
+        boxShadow: 'inset 0 40px 80px rgba(0,0,0,.7), inset 0 -60px 80px rgba(0,0,0,.8)',
+      }}
+    >
+      {/* court paint */}
+      <svg aria-hidden="true" viewBox="0 0 1000 700" preserveAspectRatio="none" className="pointer-events-none absolute inset-0 h-full w-full opacity-70">
+        <g fill="none" stroke="#f4efe6" strokeWidth="5">
+          <circle cx="500" cy="350" r="120" />
+          <path d="M500 0v700" />
+        </g>
+        <circle cx="500" cy="350" r="40" fill="#ffc20e" opacity="0.8" />
+      </svg>
+      <div className="halftone opacity-30" aria-hidden="true" />
+      {players.map((p, i) => {
+        const s = scatter(i, players.length)
+        return (
+          <div
+            key={p.slug}
+            className="pile-drag absolute w-[clamp(170px,15vw,230px)] touch-none select-none"
+            style={{ left: `calc(${s.x}% - clamp(85px,7.5vw,115px))`, top: `calc(${Math.min(88, s.y)}% - 140px)`, zIndex: i + 1 }}
+            data-rot={s.rot}
+            onPointerEnter={(e) => {
+              e.currentTarget.style.zIndex = String(++top.current)
+              squeak()
+            }}
+          >
+            <div className="pile-card" style={{ transform: `rotate(${s.rot}deg)` }}>
+              <Card p={p} />
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+/** Star burst for the rating. */
+function Burst({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="absolute -top-4 -left-4 z-10 grid size-[34%] min-h-14 min-w-14 place-items-center">
+      <svg viewBox="0 0 100 100" className="absolute inset-0 h-full w-full drop-shadow-[3px_3px_0_#0b0b0b]" aria-hidden="true">
+        <path
+          d={Array.from({ length: 24 }, (_, i) => {
+            const a = (i / 24) * Math.PI * 2
+            const r = i % 2 ? 36 : 50
+            return `${i ? 'L' : 'M'}${50 + Math.cos(a) * r} ${50 + Math.sin(a) * r}`
+          }).join(' ') + 'Z'}
+          fill="#ff4d00"
+          stroke="#0b0b0b"
+          strokeWidth="3"
+        />
+      </svg>
+      <span className="relative flex flex-col items-center leading-none">
+        <span className="display text-[clamp(22px,2.2vw,32px)] text-tar">{children}</span>
+        <span className="font-mono text-[8px] font-bold tracking-widest text-tar">OVR</span>
+      </span>
+    </span>
+  )
+}
+
+export function Card({ p }: { p: Player }) {
   const el = useRef<HTMLButtonElement>(null)
   const [hot, setHot] = useState(false)
   const { dive } = useChrome()
   const photo = p.image.kind === 'photo'
 
-  const move = (e: React.PointerEvent) => {
-    const r = el.current!.getBoundingClientRect()
-    const x = (e.clientX - r.left) / r.width
-    const y = (e.clientY - r.top) / r.height
-    el.current!.style.setProperty('--rx', `${(0.5 - y) * 16}deg`)
-    el.current!.style.setProperty('--ry', `${(x - 0.5) * 18}deg`)
-    el.current!.style.setProperty('--mx', `${x * 100}%`)
-    el.current!.style.setProperty('--my', `${y * 100}%`)
-  }
-
   return (
     <button
       ref={el}
       type="button"
-      className={`dr-card group relative block aspect-[5/7] w-full [perspective:900px] text-left ${big ? 'max-w-[380px]' : ''}`}
-      onPointerEnter={() => {
-        if (!isTouch()) {
-          setHot(true)
-          squeak()
-        }
-      }}
-      onPointerMove={move}
-      onPointerLeave={() => {
-        setHot(false)
-        el.current!.style.setProperty('--rx', '0deg')
-        el.current!.style.setProperty('--ry', '0deg')
-      }}
-      onClick={() => {
+      className="group relative block aspect-[5/7] w-full text-left transition-transform duration-150 hover:-translate-y-2"
+      onPointerEnter={() => setHot(true)}
+      onPointerLeave={() => setHot(false)}
+      onClick={(e) => {
+        const drag = e.currentTarget.closest<HTMLElement>('.pile-drag')
+        if (drag && drag.dataset.click === '0') return
         flick()
         const img = el.current!.querySelector('img')!
         dive({ from: img.getBoundingClientRect(), src: cardImage(p), href: `/players/${p.slug}`, focus: [0.5, 0.25] })
@@ -135,43 +305,37 @@ export function Card({ p, big = false }: { p: Player; big?: boolean }) {
       data-cursor="SCOUT"
       aria-label={`${p.name}, ${p.position}, number ${p.number}`}
     >
-      <span className="absolute inset-0 overflow-hidden rounded-[14px] border border-chalk/15 bg-[linear-gradient(160deg,#232327,#0f0f11)] shadow-[0_30px_60px_-30px_rgba(0,0,0,0.9)] transition-transform duration-200 ease-out [transform:rotateX(var(--rx,0))_rotateY(var(--ry,0))] [transform-style:preserve-3d]">
-        {/* highlight behind him */}
-        {hot && (
-          <video className="absolute inset-0 h-full w-full object-cover opacity-45 pop-in [filter:grayscale(.3)]" autoPlay muted playsInline loop aria-hidden="true">
-            <source src={`/media/${p.clip}.webm`} type="video/webm" />
-            <source src={`/media/${p.clip}.mp4`} type="video/mp4" />
-          </video>
-        )}
-        <span className="absolute inset-x-0 top-0 h-2/3 bg-[radial-gradient(70%_60%_at_50%_30%,rgba(212,255,58,0.18),transparent)]" />
-        {/* the player */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={cardImage(p)}
-          alt=""
-          loading="lazy"
-          className={`absolute transition-[filter,transform] duration-300 ${photo ? 'inset-0 h-full w-full object-cover' : 'bottom-[18%] left-1/2 h-[76%] w-auto max-w-none object-contain'} ${hot ? '[filter:grayscale(0)_drop-shadow(0_0_10px_rgba(212,255,58,.5))]' : '[filter:grayscale(1)_contrast(1.1)]'}`}
-          style={photo ? undefined : { transform: `translateX(-50%) ${hot ? 'scale(1.04)' : ''}` }}
-        />
-        {/* holo sheen */}
-        <span
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 opacity-0 mix-blend-color-dodge transition-opacity duration-200 group-hover:opacity-70"
-          style={{ background: 'linear-gradient(115deg, transparent 20%, rgba(255,0,140,.35) 35%, rgba(0,255,220,.35) 45%, rgba(212,255,58,.45) 55%, transparent 70%)', backgroundSize: '220% 220%', backgroundPosition: 'var(--mx,50%) var(--my,50%)' }}
-        />
-        {/* top: rating + number */}
-        <span className="absolute top-3 left-3 flex flex-col items-center leading-none">
-          <span className="display text-[clamp(26px,3vw,38px)] text-volt">{p.ovr}</span>
-          <span className="font-mono text-[9px] tracking-widest text-chalk/70">OVR</span>
+      <Burst>{p.ovr}</Burst>
+      <span className="tape -top-3 right-6 rotate-6" aria-hidden="true" />
+      <span className="absolute inset-0 overflow-hidden border-[5px] border-tar bg-volt shadow-[10px_12px_0_rgba(0,0,0,.55)]">
+        {/* halftone heat */}
+        <span className="absolute inset-[6px] overflow-hidden bg-[radial-gradient(80%_70%_at_50%_35%,#ff8a00,#ff4d00_55%,#b32400)]">
+          <span className="halftone opacity-60" />
+          {hot && (
+            <video className="absolute inset-0 h-full w-full object-cover opacity-50 mix-blend-luminosity" autoPlay muted playsInline loop aria-hidden="true">
+              <source src={`/media/${p.clip}.webm`} type="video/webm" />
+              <source src={`/media/${p.clip}.mp4`} type="video/mp4" />
+            </video>
+          )}
+          {/* giant number behind him */}
+          <span aria-hidden="true" className="display absolute top-[4%] right-[4%] text-[clamp(80px,9vw,130px)] leading-none text-transparent [-webkit-text-stroke:3px_#0b0b0b]">
+            {p.number}
+          </span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={cardImage(p)}
+            alt=""
+            draggable={false}
+            className={`absolute transition-transform duration-200 ${photo ? 'inset-0 h-full w-full object-cover [filter:grayscale(1)_contrast(1.3)] mix-blend-multiply' : 'bottom-[20%] left-1/2 h-[74%] w-auto max-w-none -translate-x-1/2 [filter:saturate(1.3)_drop-shadow(6px_6px_0_#0b0b0b)] group-hover:scale-105'}`}
+          />
         </span>
-        <span className="display absolute top-3 right-3 text-[clamp(22px,2.6vw,32px)] text-chalk/90">#{p.number}</span>
-        {/* bottom plate */}
-        <span className="absolute inset-x-0 bottom-0 flex flex-col gap-1 bg-[linear-gradient(transparent,rgba(10,10,11,.95)_40%)] px-3 pt-8 pb-3">
-          <span className="display text-[clamp(20px,2.4vw,30px)] leading-none">{p.name}</span>
-          <span className="flex items-center justify-between font-mono text-[10px] tracking-widest text-chalk/70 uppercase">
+        {/* name plate */}
+        <span className="absolute inset-x-0 bottom-0 border-t-[5px] border-tar bg-tar px-3 pt-1.5 pb-2">
+          <span className="display block truncate text-[clamp(22px,2.2vw,30px)] leading-none text-volt">{p.name}</span>
+          <span className="mt-1 flex justify-between font-mono text-[10px] font-bold tracking-widest text-chalk uppercase">
             <span>{p.position}</span>
             <span>{p.height}</span>
-            <span className="text-volt">{p.classOf}</span>
+            <span className="text-fire">{p.classOf}</span>
           </span>
         </span>
       </span>
