@@ -104,26 +104,26 @@ export function Pathway() {
             <circle cx="2" cy="2" r="1.1" fill="#f2f1ec" opacity="0.13" />
           </pattern>
           <radialGradient id="los">
-            <stop offset="0" stopColor="#d4ff3a" stopOpacity="0.55" />
-            <stop offset="1" stopColor="#d4ff3a" stopOpacity="0" />
+            <stop offset="0" stopColor="#ffc20e" stopOpacity="0.55" />
+            <stop offset="1" stopColor="#ffc20e" stopOpacity="0" />
           </radialGradient>
         </defs>
         <rect width="1000" height="600" fill="url(#dots)" />
         <circle cx={LOS.x} cy={LOS.y} r="90" fill="url(#los)" />
         {ROUTES.map((r, i) => (
-          <path key={r.code} className="pw-route" d={`M${LOS.x} ${LOS.y} Q ${(LOS.x + r.x) / 2} ${Math.min(LOS.y, r.y) - 160} ${r.x} ${r.y}`} fill="none" stroke="#d4ff3a" strokeWidth="2" strokeLinecap="round" opacity={0.9 - i * 0.08} />
+          <path key={r.code} className="pw-route" d={`M${LOS.x} ${LOS.y} Q ${(LOS.x + r.x) / 2} ${Math.min(LOS.y, r.y) - 160} ${r.x} ${r.y}`} fill="none" stroke="#ffc20e" strokeWidth="2" strokeLinecap="round" opacity={0.9 - i * 0.08} />
         ))}
         {ROUTES.map((r, i) => (
           <g key={r.code} className={`pw-dest-${i}`} style={{ opacity: 0.15, transition: 'opacity .3s' }}>
-            <circle cx={r.x} cy={r.y} r="6" fill="#d4ff3a" />
-            <circle cx={r.x} cy={r.y} r="14" fill="none" stroke="#d4ff3a" strokeOpacity="0.5" />
+            <circle cx={r.x} cy={r.y} r="6" fill="#ffc20e" />
+            <circle cx={r.x} cy={r.y} r="14" fill="none" stroke="#ffc20e" strokeOpacity="0.5" />
             <text x={r.x + 18} y={r.y + 5} fill="#f2f1ec" fontFamily="ui-monospace, monospace" fontSize="14" letterSpacing="2">
               {r.code}
             </text>
           </g>
         ))}
-        <circle cx={LOS.x} cy={LOS.y} r="9" fill="#d4ff3a" />
-        <text x={LOS.x - 14} y={LOS.y + 34} fill="#d4ff3a" fontFamily="Anton, Impact, sans-serif" fontSize="30">
+        <circle cx={LOS.x} cy={LOS.y} r="9" fill="#ffc20e" />
+        <text x={LOS.x - 14} y={LOS.y + 34} fill="#ffc20e" fontFamily="Anton, Impact, sans-serif" fontSize="30">
           LAGOS
         </text>
       </svg>

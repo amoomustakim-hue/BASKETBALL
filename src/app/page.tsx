@@ -1,5 +1,6 @@
 import { Draft } from '@/components/Draft'
 import { Elite } from '@/components/Elite'
+import { Tape, Window } from '@/components/Energy'
 import { Footer } from '@/components/Footer'
 import { Lineup } from '@/components/Lineup'
 import { YoureNext } from '@/components/Next'
@@ -11,6 +12,8 @@ export default function Home() {
     <main>
       <Lineup />
       <Shot />
+      <Tape />
+      <Window />
       <Elite />
       <Draft />
       <Pathway />

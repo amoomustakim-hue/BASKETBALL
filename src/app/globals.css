@@ -8,12 +8,16 @@
   --color-steel: #2b2b30;
   --color-ash: #8a8a90;
   --color-chalk: #f2f1ec;
-  --color-volt: #d4ff3a;
+  /* volt = Lagos danfo yellow (kept the name so every class follows) */
+  --color-volt: #ffc20e;
+  --color-fire: #ff4d00;
   --color-ball: #ff6a1a;
+  --color-tar: #0b0b0b;
 
   --font-display: 'Anton', 'Impact', 'Arial Narrow', sans-serif;
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-marker: 'Permanent Marker', 'Comic Sans MS', cursive;
 
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-snap: cubic-bezier(0.7, 0, 0.2, 1);
@@ -102,4 +106,53 @@
     animation-iteration-count: 1 !important;
     transition-duration: 1ms !important;
   }
+}
+
+/* ---------- Street textures ---------- */
+
+/* Yellow-and-black hazard stripes, like the pole they posed against. */
+@utility hazard {
+  background: repeating-linear-gradient(-45deg, var(--color-volt) 0 22px, #0b0b0b 22px 44px);
+}
+/* Print halftone over a photo. */
+@utility halftone {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(rgba(11, 11, 11, 0.55) 1.1px, transparent 1.4px);
+  background-size: 6px 6px;
+  mix-blend-mode: multiply;
+}
+/* A strip of masking tape. */
+@utility tape {
+  position: absolute;
+  width: 90px;
+  height: 26px;
+  background: rgba(244, 239, 230, 0.78);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  clip-path: polygon(3% 0, 97% 4%, 100% 100%, 0 95%);
+}
+@utility marker {
+  font-family: var(--font-marker);
+  text-transform: none;
+  letter-spacing: 0;
+}
+/* Impact: a hard shake. */
+@utility shake {
+  animation: shake 360ms cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+@keyframes shake {
+  10%, 90% { transform: translate3d(-2px, 1px, 0); }
+  20%, 80% { transform: translate3d(4px, -2px, 0); }
+  30%, 50%, 70% { transform: translate3d(-7px, 3px, 0); }
+  40%, 60% { transform: translate3d(7px, -3px, 0); }
+}
+/* Slam in: stretched tall, snapped flat. */
+@utility slam {
+  animation: slam 420ms cubic-bezier(0.2, 1.4, 0.3, 1) both;
+}
+@keyframes slam {
+  0% { opacity: 0; transform: scale(1.8, 2.6) translateY(-12%); filter: blur(6px); }
+  60% { opacity: 1; transform: scale(0.94, 0.88); filter: blur(0); }
+  100% { transform: none; }
 }

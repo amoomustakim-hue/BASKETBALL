@@ -126,7 +126,7 @@ function Preloader() {
       k -= 1
       setN(k)
       tick()
-      if (k > 0) timer = setTimeout(step, Math.max(28, 120 - (24 - k) * 5))
+      if (k > 0) timer = setTimeout(step, Math.max(22, 70 - (24 - k) * 3))
       else {
         buzzer()
         // Flash, then the light banks.
@@ -140,7 +140,7 @@ function Preloader() {
           })
       }
     }
-    timer = setTimeout(step, 450)
+    timer = setTimeout(step, 250)
     return () => clearTimeout(timer)
   }, [])
 

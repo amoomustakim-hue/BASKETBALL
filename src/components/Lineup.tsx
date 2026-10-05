@@ -28,6 +28,7 @@ const FULL = place({ x: 0, y: 0, w: LINEUP.W, h: LINEUP.H })
 export function Lineup() {
   const root = useRef<HTMLElement>(null)
   const stage = useRef<HTMLDivElement>(null)
+  const shaker = useRef<HTMLDivElement>(null)
   const hit = useRef<{ data: Uint8ClampedArray; w: number; h: number } | null>(null)
   const hovering = useRef<string | null>(null)
   const [active, setActive] = useState<string | null>(null)
@@ -65,6 +66,17 @@ export function Lineup() {
     return k ? IDS[k - 1] : null
   }
 
+  /** Camera shake + a white flash frame. */
+  const impact = (strength = 1) => {
+    const st = shaker.current
+    if (st) {
+      st.classList.remove('shake')
+      void st.offsetWidth
+      st.classList.add('shake')
+    }
+    gsap.fromTo(root.current!.querySelector('.lu-flash'), { opacity: 0.55 * strength }, { opacity: 0, duration: 0.18, ease: 'power2.out' })
+  }
+
   const light = (id: string | null) => {
     if (id === hovering.current) return
     hovering.current = id
@@ -72,6 +84,7 @@ export function Lineup() {
     if (id) {
       squeak()
       crowd(1.2, 0.12)
+      impact(0.5)
     }
   }
 
@@ -104,13 +117,14 @@ export function Lineup() {
             setAuto(id)
             if (id && !hovering.current) {
               crowd(1, 0.18)
-              haptic(10)
+              haptic(14)
+              impact()
             }
           }
         },
       },
     })
-    tl.to('.lu-stage', { scale: 1.1, ease: 'none', duration: 0.2 }, 0)
+    tl.to('.lu-stage', { scale: 1.12, ease: 'none', duration: 0.2 }, 0)
       .to('.lu-word', { yPercent: -18, scale: 1.06, ease: 'none', duration: 0.2 }, 0)
       .to('.lu-hint', { opacity: 0, duration: 0.05 }, 0.05)
       .to('.lu-dark', { opacity: 0.88, ease: 'power1.in', duration: 0.2 }, 0.76)
@@ -121,24 +135,49 @@ export function Lineup() {
 
 
   return (
-    <section id="lineup" ref={root} className="relative h-svh overflow-hidden bg-ink" aria-label="The lineup">
-      {/* Street-light glow */}
-      <div aria-hidden="true" className="flicker absolute inset-x-0 top-0 h-2/3 bg-[radial-gradient(60%_60%_at_50%_0%,rgba(242,241,236,0.13),transparent)]" />
-
-      {/* The road, at night (under the word) */}
-      <div aria-hidden="true" className="lu-stage absolute bottom-0 left-1/2 aspect-[1210/1208] h-[min(100svh,130vw)] origin-bottom -translate-x-1/2">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/lineup/bg.webp" alt="" className="absolute max-w-none [filter:grayscale(1)_brightness(.32)_contrast(1.25)]" style={FULL} />
-        <div className="absolute inset-0 bg-[radial-gradient(70%_60%_at_50%_80%,transparent,rgba(10,10,11,0.9))]" />
+    <section id="lineup" ref={root} className="relative h-svh overflow-hidden bg-volt text-tar" aria-label="The lineup">
+      <div className="halftone opacity-40" aria-hidden="true" />
+      {/* Hazard bands, like the pole on that road */}
+      <div aria-hidden="true" className="hazard absolute -top-6 -left-24 h-14 w-[70vw] -rotate-6 shadow-[0_8px_0_#0b0b0b]" />
+      <div aria-hidden="true" className="absolute inset-x-0 bottom-0 z-20 h-12 overflow-hidden border-t-4 border-tar bg-tar">
+        <div className="marquee-l flex w-max items-center gap-8 py-2 whitespace-nowrap">
+          {[...Array(2)].flatMap((_, k) =>
+            ['Banire Basketball', 'Lagos', 'Elite 50', 'Top 50 prospects', 'Lagos builds them'].map((t) => (
+              <span key={`${k}${t}`} className="display flex items-center gap-8 text-[26px] text-volt">
+                {t} <span className="text-fire">✦</span>
+              </span>
+            )),
+          )}
+        </div>
       </div>
 
-      <h1 className="lu-word display pointer-events-none absolute inset-x-0 top-[13svh] text-center text-[27vw] text-chalk/95 select-none sm:top-[9svh] sm:text-[24vw]" aria-label="Banire">
-        Banire
+      <h1 className="lu-word display pointer-events-none absolute inset-x-0 top-[12svh] text-center text-[28vw] leading-[0.8] text-tar select-none sm:top-[7svh] sm:text-[25vw]" aria-label="Banire">
+        <span className="relative inline-block">
+          <span aria-hidden="true" className="absolute inset-0 translate-x-[0.035em] translate-y-[0.035em] text-transparent [-webkit-text-stroke:3px_#0b0b0b]">
+            Banire
+          </span>
+          Banire
+        </span>
       </h1>
 
+      {/* Marker scribbles */}
+      <div aria-hidden="true" className="lu-word pointer-events-none absolute top-[44svh] left-[4vw] hidden -rotate-6 sm:block">
+        <span className="marker text-[clamp(22px,2.4vw,40px)] text-fire">Lagos, NG</span>
+        <svg viewBox="0 0 200 80" className="absolute -inset-4 w-[calc(100%+32px)]" fill="none" stroke="#ff4d00" strokeWidth="4" strokeLinecap="round">
+          <path d="M20 40c0-26 160-34 168-6 8 26-150 40-176 14C0 36 40 10 90 8" />
+        </svg>
+      </div>
+      <div aria-hidden="true" className="lu-word pointer-events-none absolute top-[38svh] right-[4vw] hidden rotate-3 text-right sm:block">
+        <span className="marker block text-[clamp(22px,2.4vw,40px)]">the future</span>
+        <svg viewBox="0 0 160 70" className="ml-auto w-[120px]" fill="none" stroke="#0b0b0b" strokeWidth="5" strokeLinecap="round">
+          <path d="M150 6C120 40 70 58 14 56M14 56l20-16M14 56l22 10" />
+        </svg>
+      </div>
+
+      <div ref={shaker} className="absolute inset-0">
       <div
         ref={stage}
-        className="lu-stage absolute bottom-0 left-1/2 aspect-[1210/1208] h-[min(100svh,130vw)] origin-bottom -translate-x-1/2"
+        className="lu-stage absolute bottom-12 left-1/2 aspect-[1210/1208] h-[min(calc(100svh-48px),130vw)] origin-bottom -translate-x-1/2"
         onPointerMove={(e) => !touch && light(who(e.clientX, e.clientY))}
         onPointerLeave={() => !touch && light(null)}
         onClick={(e) => {
@@ -149,27 +188,30 @@ export function Lineup() {
         }}
         data-cursor={active ? 'ENTER' : undefined}
       >
-        {/* The team */}
+        {/* The team: a black-and-white sticker on yellow */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/lineup/players.webp"
           alt="The Banire Basketball team on a Lagos road"
-          className="absolute max-w-none transition-[filter] duration-300"
-          style={{ ...FULL, filter: `grayscale(1) contrast(1.15) brightness(${shown ? 0.3 : 0.95})` }}
+          className="absolute max-w-none transition-[filter,opacity] duration-150"
+          style={{ ...FULL, filter: `grayscale(1) contrast(1.4) brightness(1.05) drop-shadow(10px 10px 0 rgba(11,11,11,.85))`, opacity: shown ? 0.32 : 1 }}
         />
-        {/* The lit player: colour, volt rim, and his highlight inside his body */}
+        {/* The lit player: full colour, white sticker edge, his highlight inside him */}
         {IDS.map((id) => {
           const on = shown === id
           const p = byId(id)
           return (
-            <div key={id} className="pointer-events-none absolute" style={place(LINEUP.boxes[id])}>
+            <div key={id} className={`pointer-events-none absolute transition-transform duration-200 ${on ? 'z-10 scale-[1.06]' : ''}`} style={{ ...place(LINEUP.boxes[id]), transformOrigin: '50% 100%' }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 data-cut={id}
                 src={`/lineup/${id}.webp`}
                 alt=""
-                className="absolute inset-0 h-full w-full max-w-none transition-opacity duration-200"
-                style={{ opacity: on ? 1 : 0, filter: 'drop-shadow(0 0 1.5px #d4ff3a) drop-shadow(0 0 14px rgba(212,255,58,0.55))' }}
+                className="absolute inset-0 h-full w-full max-w-none"
+                style={{
+                  opacity: on ? 1 : 0,
+                  filter: 'saturate(1.35) contrast(1.1) drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff) drop-shadow(12px 12px 0 #0b0b0b)',
+                }}
               />
               {on && <SilhouetteVideo id={id} clip={p.clip} />}
             </div>
@@ -185,15 +227,19 @@ export function Lineup() {
             boxShadow: '0 0 80px 30px rgba(255,106,26,0.45)',
           }}
         />
-        {/* Name tag at his feet */}
-        {player && <Tag p={player} box={LINEUP.boxes[shown!]} />}
+      </div>
       </div>
 
-      {/* Lights out (scroll end) */}
-      <div className="lu-dark pointer-events-none absolute inset-0 bg-ink opacity-0" aria-hidden="true" />
+      {/* The name slams in across the bottom */}
+      {player && <Banner key={player.slug} p={player} />}
 
-      <p className="lu-hint pointer-events-none absolute inset-x-0 bottom-5 text-center font-mono text-[11px] tracking-[0.3em] text-chalk/70 uppercase">
-        {touch ? 'Tap a player · tap again to enter' : 'Hover a player · click to enter'} <span className="text-volt">↓ scroll</span>
+      {/* Impact flash */}
+      <div className="lu-flash pointer-events-none absolute inset-0 z-30 bg-chalk opacity-0" aria-hidden="true" />
+      {/* Lights out (scroll end) */}
+      <div className="lu-dark pointer-events-none absolute inset-0 z-30 bg-ink opacity-0" aria-hidden="true" />
+
+      <p className="lu-hint pointer-events-none absolute inset-x-0 bottom-16 z-20 text-center font-mono text-[11px] font-bold tracking-[0.3em] text-tar uppercase">
+        {touch ? 'Tap a player · tap again to enter' : 'Hover a player · click to enter'} ↓ scroll
       </p>
     </section>
   )
@@ -204,7 +250,7 @@ function SilhouetteVideo({ id, clip }: { id: string; clip: string }) {
   return (
     <video
       className="absolute inset-0 h-full w-full max-w-none object-cover pop-in"
-      style={{ WebkitMaskImage: mask, maskImage: mask, WebkitMaskSize: '100% 100%', maskSize: '100% 100%', opacity: 0.88, mixBlendMode: 'screen' }}
+      style={{ WebkitMaskImage: mask, maskImage: mask, WebkitMaskSize: '100% 100%', maskSize: '100% 100%', opacity: 0.62, mixBlendMode: 'hard-light', filter: 'saturate(1.4) contrast(1.15)' }}
       autoPlay
       muted
       playsInline
@@ -218,18 +264,16 @@ function SilhouetteVideo({ id, clip }: { id: string; clip: string }) {
   )
 }
 
-function Tag({ p, box }: { p: Player; box: { x: number; y: number; w: number; h: number } }) {
-  const style = place(box)
+function Banner({ p }: { p: Player }) {
   return (
-    <div
-      key={p.slug}
-      className="pointer-events-none absolute z-10 flex -translate-x-1/2 flex-col items-center pop-in"
-      style={{ left: `calc(${style.left} + ${style.width} / 2)`, top: `min(calc(${style.top} + ${style.height} - 4%), 90%)` }}
-    >
-      <span className="rounded-[4px] bg-volt px-2 py-1 font-mono text-[10px] font-bold tracking-widest whitespace-nowrap text-ink uppercase sm:text-[11px]">
-        #{p.number} · {p.position} · {p.height}
+    <div className="pointer-events-none absolute bottom-16 left-3 z-20 flex max-w-[94vw] -rotate-2 items-end gap-3 sm:left-8 sm:gap-5">
+      <span className="display slam bg-tar px-3 pt-2 pb-1 text-[clamp(56px,11vw,170px)] leading-[0.85] text-volt shadow-[8px_8px_0_#ff4d00]">{p.name}</span>
+      <span className="slam flex flex-col items-start gap-1" style={{ animationDelay: '90ms' }}>
+        <span className="display bg-fire px-2 text-[clamp(34px,5vw,72px)] leading-[0.95] text-tar">#{p.number}</span>
+        <span className="marker -rotate-3 text-[clamp(18px,2vw,30px)] whitespace-nowrap">
+          {p.position} · {p.height}
+        </span>
       </span>
-      <span className="display mt-1 text-[clamp(18px,2.4vw,30px)] whitespace-nowrap text-chalk [text-shadow:0_2px_18px_rgba(0,0,0,.9)]">{p.name}</span>
     </div>
   )
 }
