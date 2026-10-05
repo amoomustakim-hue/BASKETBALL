@@ -1,63 +1,47 @@
 import Link from 'next/link'
+import { Wordmark } from './Chrome'
+import { ACADEMY } from '@/lib/academy'
 
-/** Final whistle: the scoreboard, contacts and dates (placeholders until confirmed). */
+/** Contacts and dates are placeholders until the academy confirms them. */
 export function Footer() {
   return (
-    <footer id="contact" className="relative bg-court px-5 pt-20 pb-24 sm:px-10">
-      <div className="mx-auto max-w-[1200px]">
-        <div className="mx-auto flex max-w-[760px] items-stretch justify-center gap-3 rounded-[14px] border border-chalk/10 bg-ink p-4 font-mono sm:gap-6 sm:p-6">
-          {[
-            ['Banire', '50'],
-            ['World', '00'],
-          ].map(([t, s], i) => (
-            <div key={t} className="flex flex-1 flex-col items-center gap-2">
-              <span className="text-[11px] tracking-[0.35em] text-ash uppercase">{t}</span>
-              <span className={`text-[clamp(64px,13vw,140px)] leading-none font-bold tabular-nums ${i ? 'text-[#ff3b2f]/70' : 'text-[#ff3b2f]'}`} style={{ textShadow: '0 0 24px rgba(255,59,47,.6)' }}>
-                {s}
-              </span>
-            </div>
-          ))}
-          <div className="flex flex-col items-center justify-center gap-1 border-l border-chalk/10 pl-3 sm:pl-6">
-            <span className="text-[10px] tracking-widest text-ash uppercase">Qtr</span>
-            <span className="text-[28px] text-volt">4</span>
-            <span className="text-[10px] tracking-widest text-ash uppercase">Final</span>
-          </div>
-        </div>
-
-        <div className="mt-16 grid gap-10 sm:grid-cols-3">
+    <footer id="contact" className="border-t border-line bg-ink px-5 pt-24 pb-12 sm:px-10">
+      <div className="mx-auto max-w-[1440px]">
+        <p className="serif max-w-[16ch] text-[clamp(44px,6vw,96px)] leading-[0.95]">
+          {ACADEMY.motto[0]} <span className="text-bone/60 italic">{ACADEMY.motto[1]}</span>
+        </p>
+        <div className="mt-20 grid gap-10 border-t border-line pt-10 sm:grid-cols-4">
+          <Wordmark />
           <div>
-            <p className="font-mono text-[11px] tracking-[0.3em] text-ash uppercase">Contact</p>
-            <ul className="mt-3 flex flex-col gap-2 text-[15px] text-chalk/80">
-              <li>WhatsApp · to confirm</li>
+            <p className="label">Contact</p>
+            <ul className="mt-3 flex flex-col gap-1.5 text-[15px] text-bone/75">
+              <li>Phone · to confirm</li>
               <li>Email · to confirm</li>
               <li>Instagram · to confirm</li>
             </ul>
           </div>
           <div>
-            <p className="font-mono text-[11px] tracking-[0.3em] text-ash uppercase">Elite 50 camp</p>
-            <ul className="mt-3 flex flex-col gap-2 text-[15px] text-chalk/80">
-              <li>Banire × adidas</li>
-              <li>Lagos, Nigeria</li>
-              <li>Next dates · to confirm</li>
+            <p className="label">Elite 50</p>
+            <ul className="mt-3 flex flex-col gap-1.5 text-[15px] text-bone/75">
+              <li>Banire with adidas</li>
+              <li>Next camp · to confirm</li>
             </ul>
           </div>
           <div>
-            <p className="font-mono text-[11px] tracking-[0.3em] text-ash uppercase">Play</p>
-            <ul className="mt-3 flex flex-col gap-2 text-[15px]">
+            <p className="label">Academy</p>
+            <ul className="mt-3 flex flex-col gap-1.5 text-[15px]">
               <li>
-                <Link href="/#draft" className="hover:text-volt">The roster</Link>
+                <Link href="/#players" className="text-bone/75 transition-colors duration-500 hover:text-gold">The players</Link>
               </li>
               <li>
-                <Link href="/#next" className="hover:text-volt">Apply for Elite 50</Link>
-              </li>
-              <li>
-                <Link href="/#pathway" className="hover:text-volt">The pathway</Link>
+                <Link href="/#apply" className="text-bone/75 transition-colors duration-500 hover:text-gold">Apply</Link>
               </li>
             </ul>
           </div>
         </div>
-        <p className="display mt-20 text-center text-[clamp(64px,16vw,240px)] text-chalk/[0.06]">Lagos builds them</p>
-        <p className="text-center font-mono text-[11px] text-ash">Banire Basketball Academy · Lagos</p>
+        <p className="label mt-16">
+          {ACADEMY.name} · {ACADEMY.city}
+        </p>
       </div>
     </footer>
   )
